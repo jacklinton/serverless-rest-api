@@ -44,6 +44,13 @@ resources:
           WriteCapacityUnits: 1
         TableName: ${self:provider.environment.DYNAMODB_TABLE}
 
+custom:
+  dynamodb:
+    start:
+      port: 8000
+      inMemory: true #will only run in memory
+      migrate: true #create the table when running the app
+
 plugins:
   - serverless-dynamodb-local
   - serverless-offline
