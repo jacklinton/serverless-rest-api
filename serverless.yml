@@ -22,8 +22,45 @@ provider:
       {self:provider.environment.DYNAMODB_TABLE}"
 
 functions:
-  hello:
-    handler: handler.hello
+  create:
+    handler: handler.create
+    events:
+      - http:
+          path: notes
+          method: notes
+          cors: true
+
+  getOne:
+    handler: handler.create
+    events:
+      - http:
+          path: notes/{id}
+          method: get
+          cors: true
+
+  getAll:
+    handler: handler.getAll
+    events:
+      - http:
+        path: notes
+        method: put
+        cors: true
+
+  update:
+      handler: handler.update
+      events:
+        - http:
+          path: notes/{id}
+          method: put
+          cors: true
+
+  delete:
+      handler: handler.delete
+      events:
+        - http:
+          path: notes/{id}
+          method: delete
+          cors: true
 
 resources:
   Resources:
