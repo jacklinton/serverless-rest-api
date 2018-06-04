@@ -41,20 +41,55 @@ module.exports.create = (event, context, callback) => {
 
 module.exports.getOne = (event, context, callback) => {
     // get one note from the database
-    const response = {
-        statusCode: 200,
-        body: JSON.stringify('Fetch one note.')
+    const params = {
+      TableName: process.env.DYNAMODB_TABLE,
+      Key: {
+        id: event.pathParameters.id
+      }
     };
-    callback(null, response);
+
+    dynamoDb.get(params, (error, result) => {
+
+      if (error) {
+        console.error(error);
+        return callback(null, {
+          statusCode: error.statusCode || 500,
+          headers: { 'Content-Type': 'text/plain' },
+          body: 'Could not fetch the note.'
+        });
+      }
+
+      const response = {
+        statusCode: 200,
+        body: JSON.stringify(result.Item)
+      };
+      callback(null, response)
+    })
 };
 
 module.exports.getAll = (event, context, callback) => {
     // get all notes from the database
-    const response = {
-        statusCode: 200,
-        body: JSON.stringify('Fetch all notes.')
+    const params = {
+        TableName: process.env.DYNAMODB_TABLE
     };
-    callback(null, response);
+
+    dynamoDb.scan(params, (error, result) => {
+
+        if (error) {
+            console.error(error);
+            return callback(null, {
+                statusCode: error.statusCode || 500,
+                headers: { 'Content-Type': 'text/plain' },
+                body: 'Could not fetch the notes.'
+            });
+        }
+
+        const response = {
+            statusCode: 200,
+            body: JSON.stringify(result.Items)
+        };
+        callback(null, response)
+    })
 };
 
 module.exports.update = (event, context, callback) => {
