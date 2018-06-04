@@ -94,18 +94,66 @@ module.exports.getAll = (event, context, callback) => {
 
 module.exports.update = (event, context, callback) => {
     // update a note in the database
-    const response = {
-        statusCode: 200,
-        body: JSON.stringify('Update a note.')
+    const data = JSON.parse(event.body);
+
+    const params = {
+      TableName: process.env.DYNAMODB_TABLE,
+      Key: {
+        id: event.pathParameters.id
+      },
+
+      ExpressionAttributeValues: {
+        ':content': data.content
+      },
+
+      UpdateExpression: 'SET content = :content',
+
+      ReturnValues: 'ALL_NEW'
     };
-    callback(null, response);
+
+    dynamoDb.update(params, (error, result) => {
+
+        if (error) {
+            console.error(error);
+            return callback(null, {
+                statusCode: error.statusCode || 500,
+                headers: { 'Content-Type': 'text/plain' },
+                body: 'Could not update the note.'
+            });
+        }
+
+        const response = {
+          statusCode: 200,
+          body: JSON.stringify(result.Attributes)
+        };
+        callback(null, response);
+    })
 };
 
 module.exports.delete = (event, context, callback) => {
     // delete a note from the database
-    const response = {
-        statusCode: 200,
-        body: JSON.stringify('Delete a note.')
+    const params = {
+      TableName: process.env.DYNAMODB_TABLE,
+      Key: {
+        id: event.pathParameters.id
+      }
     };
-    callback(null, response);
+
+    dynamoDb.delete(params, (error) => {
+
+        if (error) {
+            console.error(error);
+            return callback(null, {
+                statusCode: error.statusCode || 500,
+                headers: { 'Content-Type': 'text/plain' },
+                body: 'Could not delete the note.'
+            });
+        }
+
+        const response = {
+          statusCode: 200,
+          body: JSON.stringify('Removed the note with id: ' + event.pathParameters.id)
+        };
+        callback(null, response);
+    })
 };
